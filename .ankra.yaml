@@ -12,11 +12,11 @@ variables:
   NAMESPACE: my test
   REPLICA_COUNT: "3"
   WORKER_REPLICA_COUNT: "3"
-  REGISTRY_USER: robot$global
+  REGISTRY_USER: robotAccount
   HELM_NAME: my-app
   HELM_CHART: helm/
   HELM_CHART_VERSION: 0.1.1
-  SERVICE_NAME: portal
+  SERVICE_NAME: my-app
   SERVICE_URL: $SERVICE_NAME.$NAMESPACE.ankra.app
 
 predeploy:

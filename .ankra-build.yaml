@@ -9,7 +9,7 @@ variables:
   TARGET: dev
   GIT_PROVIDER: github
   GIT_CREDENTIAL: github
-  SERVICE_NAME: portal
+  SERVICE_NAME: my-app
 
 build:
   target:

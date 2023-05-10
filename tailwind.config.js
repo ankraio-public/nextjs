@@ -7,19 +7,8 @@ module.exports = {
     extend: {},
     fontFamily: {
       ...fontFamily,
-      sans: ["var(--font-poppins)"],
+      sans: ["var(--font-inter)"],
     },
   },
   plugins: [],
-  safelist: [
-    {
-      pattern: /gap-/,
-    },
-    {
-      pattern: /items-/,
-    },
-    {
-      pattern: /justify-/,
-    },
-  ],
 };

@@ -1,17 +1,13 @@
 import '@/styles/globals.css'
 import classNames from '@/lib/classNames'
 import type { AppProps } from 'next/app'
-import { Poppins } from 'next/font/google'
+import { Inter } from 'next/font/google'
 
-const poppins = Poppins({
-  subsets: ['latin'],
-  variable: '--font-poppins',
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-})
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <main className={classNames(poppins.variable, 'font-sans')}>
+    <main className={classNames(inter.variable, 'font-sans', "flex min-h-screen flex-col items-center justify-between p-24")}>
       <Component {...pageProps} />
     </main>
   )

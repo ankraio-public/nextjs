@@ -1,40 +1,62 @@
-## Base ########################################################################
-# Use a larger node image to do the build for native deps (e.g., gcc, python)
-FROM node:latest as base
+FROM node:18-alpine AS base
 
-# Reduce npm log spam and colour during install within Docker
-ENV NPM_CONFIG_LOGLEVEL=warn
-ENV NPM_CONFIG_COLOR=false
+# Install dependencies only when needed
+FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-# We'll run the app as the `node` user, so put it in their home directory
-WORKDIR /home/node/app
-# Copy the source code over
-COPY --chown=node:node . /home/node/app/
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
 
-## Development #################################################################
-# Define a development target that installs devDeps and runs in dev mode
-FROM base as development
-WORKDIR /home/node/app
-# Install (not ci) with dependencies, and for Linux vs. Linux Musl (which we use for -alpine)
-RUN yarn install
-# Switch to the node user vs. root
-# USER node
-# Expose port 3000
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
+# ENV NEXT_TELEMETRY_DISABLED 1
+
+# Change the build command with the one that your project uses - if needed.
+RUN \
+  if [ -f yarn.lock ]; then yarn build; \
+  elif [ -f package-lock.json ]; then npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then pnpm run build; \
+  else echo "Lockfile not found. We are unable to build your app." && exit 1; \
+  fi
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+# Uncomment the following line in case you want to disable telemetry during runtime.
+# ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
 EXPOSE 3000
-# Start the app in debug mode so we can attach the debugger
-CMD ["yarn", "start", "--host", "0.0.0.0"]
 
-## Production ##################################################################
-# Also define a production target which doesn't use devDeps
-FROM base as production
-WORKDIR /home/node/app
-COPY --chown=node:node --from=development /home/node/app/node_modules /home/node/app/node_modules
-# Build the Docusaurus app
-RUN yarn run build
+ENV PORT 3000
 
-## Deploy ######################################################################
-# Use a stable nginx image
-FROM nginx:stable-alpine as deploy
-WORKDIR /home/node/app
-# Copy what we've installed/built from production
-COPY --chown=node:node --from=production /home/node/app/build /usr/share/nginx/html/
+CMD ["node", "server.js"]

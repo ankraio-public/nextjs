@@ -1,22 +1,22 @@
-import Head from 'next/head'
+import Head from "next/head";
 
 interface SeoProps {
-  canonicalUrl?: string
-  description?: string
-  title?: string
-  image?: string
-  url?: string
+  canonicalUrl?: string;
+  description?: string;
+  title?: string;
+  image?: string;
+  url?: string;
 }
 
-export const TITLE = 'Next.js template'
+export const TITLE = "Next.js with Ankra";
 
-export const DESCRIPTION = 'Ankra'
+export const DESCRIPTION = "Ankra";
 
 const Seo = ({
-  url = 'https://ankra.io',
+  url = "https://ankra.io",
   description = DESCRIPTION,
   title = TITLE,
-  image = '',
+  image = "",
   canonicalUrl,
 }: SeoProps) => {
   return (
@@ -40,7 +40,7 @@ const Seo = ({
       <meta property="twitter:description" content={description} />
       <meta property="twitter:image" content={image} />
     </Head>
-  )
-}
+  );
+};
 
-export default Seo
+export default Seo;

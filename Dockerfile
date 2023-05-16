@@ -15,8 +15,15 @@ COPY --chown=node:node . /home/node/app/
 # Define a development target that installs devDeps and runs in dev mode
 FROM base as development
 WORKDIR /home/node/app
+
 # Install (not ci) with dependencies, and for Linux vs. Linux Musl (which we use for -alpine)
-RUN yarn install
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
 # Switch to the node user vs. root
 # USER node
 # Expose port 3000
@@ -30,7 +37,12 @@ FROM base as production
 WORKDIR /home/node/app
 COPY --chown=node:node --from=development /home/node/app/node_modules /home/node/app/node_modules
 # Build the Docusaurus app
-RUN yarn run build
+RUN \
+  if [ -f yarn.lock ]; then yarn build; \
+  elif [ -f package-lock.json ]; then npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then pnpm run build; \
+  else echo "Lockfile not found. We are unable to build your app." && exit 1; \
+  fi
 
 ## Deploy ######################################################################
 # Use a stable nginx image

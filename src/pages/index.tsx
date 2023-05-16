@@ -1,30 +1,30 @@
 import Image from 'next/image'
 
 import Seo from '@/components/elements/Seo'
-import Stack from '@/components/elements/Stack'
 
 const Home = () => {
   return (
     <>
       <Seo />
-      <Stack direction="vertical" justify="center" align="center">
+      <div className="flex flex-col justify-center items-center gap-3">
         <p>
           Get started by editing&nbsp;
           <code>src/pages/index.tsx</code>
         </p>
-        <Stack>
-          <a href="https://ankra.io" target="_blank" rel="noopener noreferrer">
-            By{' '}
+        <div className="flex flex-row justify-stretch items-stretch gap-3">
+          <a href="https://ankra.io" target="_blank" rel="noopener noreferrer" className="pointer-events-none flex flex-col place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0">
+            <span className="text-gray-500 dark:text-gray-400">By{' '} Ankra</span>
             <Image
               src="/ankra.png"
               alt="Ankra Logo"
-              width={100}
-              height={24}
+              width={200}
+              height={100}
               priority
+              className="rounded-3xl border-t border-neutral-800 drop-shadow-xl"
             />
           </a>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </>
   )
 }

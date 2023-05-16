@@ -8,7 +8,7 @@ interface SeoProps {
   url?: string
 }
 
-export const TITLE = 'Frontend template'
+export const TITLE = 'Next.js template'
 
 export const DESCRIPTION = 'Ankra'
 

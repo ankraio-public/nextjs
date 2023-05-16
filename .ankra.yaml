@@ -57,6 +57,12 @@ variables:
       - "test"
       - "dev"
     description: "Namespace to deploy in."
+  - name: SERVICE_URL
+    default: "myapp.myorg.ankra.app"
+    options:
+      - "myapp.myorg.ankra.app"
+      - "myapp.dev.myorg.ankra.app"
+    description: "Service URL to deploy in."
 
 # `build` is the name of the stage.
 build:
@@ -88,17 +94,8 @@ build:
           path: $WORKSPACE/helm
           push: true
 
-  # @mark to check and discuss
-  # REPLICA_COUNT: "3"
-  # WORKER_REPLICA_COUNT: "3"
-  # HELM_NAME: myapp
-  # HELM_CHART: helm/
-  # GIT_PROVIDER: github
-  # SERVICE_NAME: myapp
-
 # `tag` is the name of the stage.
 tag:
-  # @mark path variable is not used due to upstream definition?
   # `conditions` state the conditions that must be met to execute stage.
   conditions:
     - when: "$TAG"
@@ -119,7 +116,6 @@ tag:
       # `actions` are the actions that the git module is executed.
       actions:
         - action: delete_tag
-        # @mark - the old version is called push_delete_tag, but the new version is called push_tag?
         - action: push_tag
   # `tag` is the a job in this stage. This job is executed to create a tag.
   tag:
@@ -153,10 +149,9 @@ predeploy:
         fi
   # `cloudflare-credentials` is the a job in this stage. This job is executed to create a secret for cloudflare.
   cloudflare-credentials:
-    # `secrets` are the secrets available to this job.
+    # `secrets` are the secrets available to this job. The system will handle the authorization for the registry for you.
     secrets:
       - ORIGIN_KEY
-      # @Mark REGISTRY_PASSWORD is gone?
     script:
       commands:
         - if [[ ! $(kubectl get secret service-key -n $NAMESPACE) ]]; then
@@ -211,12 +206,6 @@ dev:
             - --set image.tag=$VERSION
             - --set fullnameOverride=$APPLICATION_NAME
             - --set global.environment=prod
-
-            # @Mark all these variables are not used in the new version?
-            # -  --set replicaCount=$REPLICA_COUNT
-            # -  --set worker.replicaCount=$WORKER_REPLICA_COUNT
-            # -  --set persistence.accessModes[0]=ReadWriteMany
-            # -  --set ingress.hostname="$SERVICE_URL"
-            # -  --set ingress.external_dns.target="lb-$CLUSTER_ID.ankra.dev"
-            # -  --set commonLabels='ankra.app/external-dns: \"true\"'
-            # -  --set persistence.storageClass="csi-s3"
+            - --set ingress.hostname="$SERVICE_URL"
+            - --set ingress.external_dns.target="lb-$CLUSTER_ID.ankra.dev"
+            - --set commonLabels='ankra.app/external-dns: \"true\"'

@@ -8,6 +8,9 @@ ENV NPM_CONFIG_COLOR=false
 
 # We'll run the app as the `node` user, so put it in their home directory
 WORKDIR /home/node/app
+
+RUN apk update
+
 # Copy the source code over
 COPY --chown=node:node . /home/node/app/
 

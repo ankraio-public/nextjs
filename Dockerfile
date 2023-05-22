@@ -10,8 +10,8 @@
 FROM node:current-alpine as base
 
 # Reduce npm log spam and colour during install within Docker
-# ENV NPM_CONFIG_LOGLEVEL=warn
-# ENV NPM_CONFIG_COLOR=false
+ENV NPM_CONFIG_LOGLEVEL=warn
+ENV NPM_CONFIG_COLOR=false
 
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
@@ -66,4 +66,4 @@ CMD ["yarn", "start"]
 FROM nginx:stable-alpine as deploy
 WORKDIR /home/node/app
 # Copy what we've installed/built from production
-COPY --chown=node:node --from=production /home/node/app/build /usr/share/nginx/html/
+COPY --chown=node:node --from=production /home/node/app/.next /usr/share/nginx/html/

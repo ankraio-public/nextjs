@@ -9,6 +9,6 @@ services:
     depends_on:
       - app
   app:
-    image: nextjs-docker-test:latest
+    image: nextjs-docker:latest
     volumes:
       - .:/home/node/app

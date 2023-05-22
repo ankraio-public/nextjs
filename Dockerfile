@@ -10,8 +10,8 @@
 FROM node:current-alpine as base
 
 # Reduce npm log spam and colour during install within Docker
-ENV NPM_CONFIG_LOGLEVEL=warn
-ENV NPM_CONFIG_COLOR=false
+# ENV NPM_CONFIG_LOGLEVEL=warn
+# ENV NPM_CONFIG_COLOR=false
 
 RUN apk --no-cache update
 
@@ -39,7 +39,7 @@ RUN \
 # Expose port 3000
 EXPOSE 3000
 # Start the app in debug mode so we can attach the debugger
-CMD ["yarn", "start", "--host", "0.0.0.0"]
+CMD ["yarn", "dev"]
 
 ## Production ##################################################################
 # Also define a production target which doesn't use devDeps
@@ -55,6 +55,8 @@ RUN \
   elif [ -f pnpm-lock.yaml ]; then pnpm run build; \
   else echo "Lockfile not found. We are unable to build your app." && exit 1; \
   fi
+
+CMD ["yarn", "start"]
 
 ## Deploy ######################################################################
 # Use a stable nginx image

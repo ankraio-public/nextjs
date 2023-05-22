@@ -7,16 +7,16 @@
 
 ## Base ########################################################################
 # Use a larger node image to do the build for native deps (e.g., gcc, python)
-FROM node:latest as base
+FROM node:current-alpine as base
 
 # Reduce npm log spam and colour during install within Docker
 ENV NPM_CONFIG_LOGLEVEL=warn
 ENV NPM_CONFIG_COLOR=false
 
+RUN apk --no-cache update
+
 # We'll run the app as the `node` user, so put it in their home directory
 WORKDIR /home/node/app
-
-RUN apk update
 
 # Copy the source code over
 COPY --chown=node:node . /home/node/app/
@@ -26,7 +26,7 @@ COPY --chown=node:node . /home/node/app/
 FROM base as development
 WORKDIR /home/node/app
 
-# Install (not ci) with dependencies, and for Linux vs. Linux Musl (which we use for -alpine)
+# Install dependencies based on the preferred package manager
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
@@ -46,7 +46,9 @@ CMD ["yarn", "start", "--host", "0.0.0.0"]
 FROM base as production
 WORKDIR /home/node/app
 COPY --chown=node:node --from=development /home/node/app/node_modules /home/node/app/node_modules
-# Build the Docusaurus app
+
+# Build the NextJS app
+# Change the build command with the one that your project uses - if needed.
 RUN \
   if [ -f yarn.lock ]; then yarn build; \
   elif [ -f package-lock.json ]; then npm run build; \

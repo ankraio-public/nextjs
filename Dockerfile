@@ -63,7 +63,7 @@ CMD ["yarn", "start"]
 
 ## Deploy ######################################################################
 # Use a stable nginx image
-FROM nginx:stable-alpine as deploy
+FROM nginx:mainline-alpine as deploy
 WORKDIR /home/node/app
 # Copy what we've installed/built from production
 COPY --chown=node:node --from=production /home/node/app/.next /usr/share/nginx/html/
